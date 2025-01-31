@@ -39,8 +39,7 @@ async function bootstrap() {
     // Enable CORS for HTTP requests
     app.enableCors({
       origin: '*', // Allow all origins (use specific origins in production)
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      
     });
   
     // Use the Socket.IO adapter for WebSockets
@@ -52,6 +51,6 @@ async function bootstrap() {
     next();
   });
  // Logger.log('Application is running on: http://localhost:3000');
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();

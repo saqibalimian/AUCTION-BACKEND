@@ -1,9 +1,9 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayInit, ConnectedSocket, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayInit, ConnectedSocket, MessageBody,OnGatewayConnection, OnGatewayDisconnect  } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway()
-export class BidsGateway implements OnGatewayInit {
+export class BidsGateway implements OnGatewayInit , OnGatewayConnection, OnGatewayDisconnect  {
   @WebSocketServer()
   server: Server;
 
@@ -13,6 +13,14 @@ export class BidsGateway implements OnGatewayInit {
     this.logger.log('WebSocket Gateway initialized'); // Log initialization
   }
 
+  handleConnection(client: Socket, ...args: any[]) {
+    this.logger.log(`Client connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
+  
   emitBidUpdate(data: any) {
     this.logger.log(`Emitting bidUpdate event: ${JSON.stringify(data)}`); // Log the event
     this.server.emit('bidUpdate', data);
