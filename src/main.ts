@@ -51,7 +51,7 @@ async function bootstrap() {
     Logger.log(`Raw Request Body: ${JSON.stringify(req.body)}`);
     next();
   });
-  Logger.log('Application is running on: http://localhost:3000');
-  await app.listen(3001);
+ // Logger.log('Application is running on: http://localhost:3000');
+  await app.listen(3000);
 }
 bootstrap();
