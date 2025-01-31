@@ -1,0 +1,60 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger the pipeline on pushes to the main branch
+  pull_request:
+    branches:
+      - main # Trigger the pipeline on pull requests to the main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use the Node.js version your project requires
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+  build-and-deploy:
+    needs: test # Ensure deployment only happens if tests pass
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }} # Add your Docker Hub username as a secret
+          password: ${{ secrets.DOCKER_HUB_TOKEN }} # Add your Docker Hub token as a secret
+
+      - name: Build Docker image
+        run: |
+          docker build -t your-dockerhub-username/your-repo-name:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push your-dockerhub-username/your-repo-name:latest
+
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }} # Add your Render API key as a secret
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": true}' \
+            https://api.render.com/v1/services/srv-cue78l5ds78s73a8edr0/deploys
