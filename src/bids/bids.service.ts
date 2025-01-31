@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bid } from '../entities/bid.entity';
@@ -6,6 +6,7 @@ import { Item } from '../entities/item.entity';
 import { User } from '../entities/user.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { BidsGateway } from './bids.gateway';
+import { log } from 'console';
 
 @Injectable()
 export class BidsService {
@@ -31,12 +32,14 @@ export class BidsService {
     if (!item) {
       return { success: false, message: 'Item not found' };
     }
+    Logger.log(item);
 
     // Fetch the user
     const user = await this.userRepository.findOneBy({ id: user_id });
     if (!user) {
       return { success: false, message: 'User not found' };
     }
+    Logger.log(user);
 
     // Check if the auction has expired
     const now = new Date();
@@ -63,8 +66,13 @@ export class BidsService {
       ...createBidDto,
       timestamp: now,
       user, // Associate the user with the bid
+      item, // Associate the item with the bid
     });
     await this.bidRepository.save(newBid);
+
+    // Update the item's bids array
+    item.bids = [...(item.bids || []), newBid]; // Add the new bid to the item's bids
+    await this.itemRepository.save(item); // Save the updated item
 
     // Notify clients via WebSocket
     this.bidsGateway.server.emit('bidUpdate', {
