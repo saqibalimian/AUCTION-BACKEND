@@ -23,7 +23,7 @@ console.log(`DB_URL: ${process.env.DB_URL}`);
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, // Only for development; disable in production
       ssl: {
-        rejectUnauthorized: true, // Disable SSL certificate validation (not recommended for production)
+        rejectUnauthorized: false, // Disable SSL certificate validation (not recommended for production)
       },
       logging: true, // Enable logging for debugging
     }),
