@@ -95,8 +95,15 @@ export class BidsService {
     }).then((result) => {
       // Step 4: Emit event after transaction success
       if (result.success) {
-        this.bidsGateway.server.emit('bidUpdate', result.bid);
-        this.logger.log(`Bid update event emitted: bid_id=${result.bid}`);
+         // Notify clients via WebSocket
+        this.bidsGateway.server.emit('bidUpdate', {
+          item_id,
+          user_id,
+          amount
+        });
+       
+        this.logger.log(`Bid update event emitted: bid_id=${result.bid?.id}`);
+      
       }
       return result;
     });
