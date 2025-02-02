@@ -21,7 +21,7 @@ console.log(`DB_URL: ${process.env.DB_URL}`);
       type: 'postgres',
       url: process.env.DB_URL,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // Only for development; disable in production
+      synchronize: true, // Only for development; disable in production
       ssl: {
         rejectUnauthorized: false, // Disable SSL certificate validation (not recommended for production)
       },

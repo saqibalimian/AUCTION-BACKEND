@@ -1,99 +1,112 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend Application - Auction System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is the backend application for an auction system built with TypeScript and NestJS. It handles bid placement, real-time updates via WebSocket, and database interactions.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
+1. [Running the Application Locally](#running-the-application-locally)
+2. [CI/CD Pipeline Setup](#cicd-pipeline-setup)
+3. [Approach to the Problem](#Approach-to-the-Problem)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Running the Application Locally
 
-## Compile and run the project
+Follow these steps to run the application locally:
 
-```bash
-# development
-$ npm run start
+## 1. Clone the Repository
+Clone the repository to your local machine:
 
-# watch mode
-$ npm run start:dev
+git clone https://github.com/saqibalimian/AUCTION-BACKEND.git
+cd AUCTION-BACKEND
 
-# production mode
-$ npm run start:prod
-```
+## Install Dependencies
+npm install
 
-## Run tests
+### Set Up Environment Variables
+API_URL=http://localhost:3000 # Backend API URL
+WS_URL=wss://localhost:3000 # Backend websocket
 
-```bash
-# unit tests
-$ npm run test
+Replace http://localhost:3000 with the actual URL of your backend API if it's hosted elsewhere.
+The .env file is used to store sensitive or environment-specific configuration values.
 
-# e2e tests
-$ npm run test:e2e
+### Start the Development Server
+ npm start
 
-# test coverage
-$ npm run test:cov
-```
+Runs the app 
+Open [http://localhost:3000] to view it in your browser.
 
-## Deployment
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### `npm test`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Launches the test runner in the interactive watch mode.\
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### `npm run build`
 
-## Resources
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-Check out a few resources that may come in handy when working with NestJS:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+### Run with Docker 
+Build the Docker image
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+docker build -t frontend-app .
 
-## License
+Run the Docker container
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+docker run -p 80:80 frontend-app
+
+Open http://localhost in your browser to access the app.
+
+
+### CI/CD Pipeline Setup
+
+The CI/CD pipeline automates testing, building, and deploying the frontend application. It uses GitHub Actions to:
+
+Run tests.
+Build a Docker image.
+Push the image to Docker Hub.
+Deploy the application to Render.
+
+Steps to Run the Pipeline
+1. Trigger the Pipeline
+Push code to the main branch or open a pull request targeting main.
+
+2. Pipeline Workflow
+The pipeline consists of the following jobs:
+
+Test Job : Runs Jest tests to ensure code quality.
+Build Job : Builds a Docker image using the Dockerfile.
+Deploy Job : Pushes the Docker image to Docker Hub and triggers a deployment on Render.
+3. Deployment
+The application is deployed to Render as a Docker-based service.
+Render pulls the latest Docker image from Docker Hub and serves it.
+
+
+### Approach to the Problem
+
+## Optimistic Locking :
+Why Optimistic Locking? : To handle concurrent bid placements efficiently, we implemented optimistic locking using a version column in the Item entity. This ensures that conflicts are detected and handled gracefully without blocking other transactions unnecessarily.
+
+## Validation and Error Handling :
+Input Validation : All inputs (e.g., bid amount) are validated before processing to ensure they meet the required criteria.
+Error Handling : Centralized error handling ensures consistent responses and meaningful error messages for users
+
+## Stateless Architecture :
+The backend was designed to be stateless, ensuring it can scale horizontally by adding more instances behind a load balancer.
+
+## Enhancement 
+Reduce Database Load with Redis :Store the highest bid in Redis
+
+Implement message queues (Kafka/RabbitMQ) for async processing. If there are thousands of bids per second, avoid processing each one synchronously.
+
+Implement rate-limiting to prevent spam bids.

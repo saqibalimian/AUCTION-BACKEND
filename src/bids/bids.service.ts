@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Connection } from 'typeorm';
 import { Bid } from '../entities/bid.entity';
 import { Item } from '../entities/item.entity';
 import { User } from '../entities/user.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { BidsGateway } from './bids.gateway';
-import { log } from 'console';
 
 @Injectable()
 export class BidsService {
+  private readonly logger = new Logger(BidsService.name);
+
   constructor(
     @InjectRepository(Bid)
     private readonly bidRepository: Repository<Bid>,
@@ -17,71 +18,87 @@ export class BidsService {
     private readonly itemRepository: Repository<Item>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly bidsGateway: BidsGateway, // Inject WebSocket gateway
+    private readonly bidsGateway: BidsGateway,
+    private readonly connection: Connection,
   ) {}
 
   async placeBid(createBidDto: CreateBidDto) {
     const { item_id, user_id, amount } = createBidDto;
 
-    // Fetch the item
-    const item = await this.itemRepository.findOne({
-      where: { id: item_id },
-      relations: ['bids'], // Include related bids
+    // Step 1: Perform transactional logic
+    return this.connection.transaction(async (manager) => {
+      try {
+        // Fetch the item with optimistic locking
+        const item = await manager.getRepository(Item).findOne({
+          where: { id: item_id },
+           });
+
+        if (!item) {
+          return { success: false, message: 'Item not found' };
+        }
+      // Apply optimistic locking
+      const lockedItem = await manager.getRepository(Item).findOne({
+        where: { id: item_id },
+        lock: { mode: 'optimistic', version: item.version },
+      });
+
+      if (!lockedItem) {
+        return { success: false, message: 'Item not found after locking' };
+      }
+
+        // Check if auction is still active
+        const now = new Date();
+        if (now > item.auction_duration ) {
+          return { success: false, message: 'Auction has ended' };
+        }
+
+        // Fetch latest highest bid inside the transaction
+        const latestBid = await manager
+          .getRepository(Bid)
+          .createQueryBuilder('bid')
+          .select('MAX(bid.amount)', 'maxAmount')
+          .where('bid.item.id = :itemId', { itemId: item_id })
+          .getRawOne();
+
+        const latestHighestBid = Math.max(item.starting_price, latestBid?.maxAmount || 0);
+
+        if (amount <= latestHighestBid) {
+          return { success: false, message: 'Bid amount must be higher' };
+        }
+
+        // Fetch user within the transaction
+        const user = await manager.getRepository(User).findOne({ where: { id: user_id } });
+        if (!user) {
+          return { success: false, message: 'User not found' };
+        }
+
+        // Create and save the new bid
+        const bid = manager.getRepository(Bid).create({
+          amount,
+          timestamp: now,
+          item,
+          user,
+        });
+        await manager.getRepository(Bid).save(bid);
+
+        // Save item to trigger optimistic locking
+        await manager.getRepository(Item).save(item);
+
+        return { success: true, bid };
+      } catch (error) {
+        if (error.name === 'OptimisticLockVersionMismatchError') {
+          return { success: false, message: 'Item was updated by another transaction, please retry' };
+        }
+        this.logger.error(`Error placing bid: ${error.message}`);
+        throw new Error('Failed to place bid');
+      }
+    }).then((result) => {
+      // Step 4: Emit event after transaction success
+      if (result.success) {
+        this.bidsGateway.server.emit('bidUpdate', result.bid);
+        this.logger.log(`Bid update event emitted: bid_id=${result.bid}`);
+      }
+      return result;
     });
-
-    if (!item) {
-      return { success: false, message: 'Item not found' };
-    }
-    Logger.log(item);
-
-    // Fetch the user
-    const user = await this.userRepository.findOneBy({ id: user_id });
-    if (!user) {
-      return { success: false, message: 'User not found' };
-    }
-    Logger.log(user);
-
-    // Check if the auction has expired
-    const now = new Date();
-    if (now > item.auction_duration) {
-      return { success: false, message: 'Auction has ended' };
-    }
-
-    // Calculate the current highest bid
-    const currentHighestBid = Math.max(
-      item.starting_price,
-      ...(item.bids || []).map((bid) => bid.amount),
-    );
-
-    // Check if the bid is higher than the current highest bid
-    if (amount <= currentHighestBid) {
-      return {
-        success: false,
-        message: 'Bid must be higher than the current highest bid',
-      };
-    }
-
-    // Save the new bid
-    const newBid = this.bidRepository.create({
-      ...createBidDto,
-      timestamp: now,
-      user, // Associate the user with the bid
-      item, // Associate the item with the bid
-    });
-    await this.bidRepository.save(newBid);
-
-    // Update the item's bids array
-    item.bids = [...(item.bids || []), newBid]; // Add the new bid to the item's bids
-    await this.itemRepository.save(item); // Save the updated item
-
-    // Notify clients via WebSocket
-    this.bidsGateway.server.emit('bidUpdate', {
-      item_id,
-      user_id,
-      amount,
-      timestamp: now.toISOString(),
-    });
-
-    return { success: true, message: 'Bid placed successfully' };
   }
 }

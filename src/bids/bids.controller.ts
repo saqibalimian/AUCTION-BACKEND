@@ -9,9 +9,11 @@ export class BidsController {
   @Post()
   async placeBid(@Body() createBidDto: CreateBidDto) {
     const result = await this.bidsService.placeBid(createBidDto);
+
     if (!result.success) {
-      throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.message || 'An error occurred while placing the bid', HttpStatus.BAD_REQUEST);
     }
+
     return result;
   }
 }
